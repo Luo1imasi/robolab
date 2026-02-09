@@ -38,6 +38,16 @@ from robolab.tasks.manager_based.beyondmimic.beyondmimic_env_cfg import BeyondMi
 from isaaclab.utils import configclass
 from robolab import ROBOLAB_ROOT_DIR
 
+s_body_name=[
+    'left_thigh_yaw_link', 
+    'right_thigh_yaw_link', 
+    'left_knee_link', 
+    'right_knee_link', 
+    'left_elbow_yaw_link', 
+    'right_elbow_yaw_link',
+    'left_ankle_pitch_link', 
+    'right_ankle_pitch_link',
+]
 
 @configclass
 class Atom01BeyondMimicEnvCfg(BeyondMimicEnvCfg):
@@ -77,5 +87,16 @@ class Atom01BeyondMimicEnvCfg(BeyondMimicEnvCfg):
 
         self.observations.policy.motion_anchor_pos_b = None
         self.observations.policy.base_lin_vel = None
+
+        self.events.randomize_com_positions.params["asset_cfg"].body_names="torso_link"
+        self.rewards.motion_special_body_pos.params["body_names"]=s_body_name
+        self.rewards.undesired_contacts.params["sensor_cfg"].body_names=[
+            r"^(?!left_ankle_roll_link$)(?!right_ankle_roll_link$).+$"
+        ]
+        self.rewards.feet_slide.params["sensor_cfg"].body_names=".*_ankle_roll_link"
+        self.rewards.feet_slide.params["asset_cfg"].body_names=".*_ankle_roll_link"
+        self.rewards.feet_orientation_l2.params["sensor_cfg"].body_names=".*_ankle_roll_link"
+        self.rewards.feet_orientation_l2.params["asset_cfg"].body_names=".*_ankle_roll_link"
+        # self.terminations.ee_body_pos.params["body_names"]=None
 
         self.episode_length_s = 20.0
