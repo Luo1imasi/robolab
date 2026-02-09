@@ -67,39 +67,15 @@ VELOCITY_RANGE = {
     "pitch": (-0.52, 0.52),
     "yaw": (-0.78, 0.78),
 }
+POSE_RANGE = {
+    "x": (-0.05, 0.05),
+    "y": (-0.05, 0.05),
+    "z": (-0.01, 0.01),
+    "roll": (-0.1, 0.1),
+    "pitch": (-0.1, 0.1),
+    "yaw": (-0.2, 0.2),
+}
 
-ori_body_names=[
-    'left_thigh_yaw_link', 
-    'right_thigh_yaw_link', 
-    'torso_link', 
-    'left_thigh_roll_link', 
-    'right_thigh_roll_link', 
-    'left_arm_pitch_link', 
-    'right_arm_pitch_link', 
-    'left_thigh_pitch_link', 
-    'right_thigh_pitch_link', 
-    'left_arm_roll_link', 
-    'right_arm_roll_link', 
-    'left_knee_link', 
-    'right_knee_link', 
-    'left_arm_yaw_link', 
-    'right_arm_yaw_link', 
-    'left_elbow_pitch_link', 
-    'right_elbow_pitch_link', 
-    'left_elbow_yaw_link', 
-    'right_elbow_yaw_link'
-]
-
-s_body_name=[
-    'left_thigh_yaw_link', 
-    'right_thigh_yaw_link', 
-    'left_knee_link', 
-    'right_knee_link', 
-    'left_elbow_yaw_link', 
-    'right_elbow_yaw_link',
-    'left_ankle_pitch_link', 
-    'right_ankle_pitch_link', 
-]
 
 @configclass
 class MySceneCfg(InteractiveSceneCfg):
@@ -150,14 +126,7 @@ class CommandsCfg:
         asset_name="robot",
         resampling_time_range=(1.0e9, 1.0e9),
         debug_vis=True,
-        pose_range={
-            "x": (-0.05, 0.05),
-            "y": (-0.05, 0.05),
-            "z": (-0.01, 0.01),
-            "roll": (-0.1, 0.1),
-            "pitch": (-0.1, 0.1),
-            "yaw": (-0.2, 0.2),
-        },
+        pose_range=POSE_RANGE,
         velocity_range=VELOCITY_RANGE,
         joint_position_range=(-0.1, 0.1),
     )
@@ -254,7 +223,7 @@ class EventCfg:
         func=mdp.randomize_rigid_body_com,
         mode="startup",
         params={
-            "asset_cfg": SceneEntityCfg("robot", body_names="torso_link"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=MISSING),
             "com_range": {"x": (-0.025, 0.025), "y": (-0.05, 0.05), "z": (-0.05, 0.05)},
         },
     )
@@ -316,7 +285,7 @@ class RewardsCfg:
     motion_special_body_pos = RewTerm(
         func=mdp.motion_special_body_postion_error_exp,
         weight=0.0,
-        params={"command_name":"motion","std":0.1,"body_names":s_body_name},
+        params={"command_name":"motion","std":0.1,"body_names":MISSING},
     )
 
     # Others
@@ -326,9 +295,7 @@ class RewardsCfg:
         params={
             "sensor_cfg": SceneEntityCfg(
                 "contact_forces",
-                body_names=[
-                    r"^(?!left_ankle_roll_link$)(?!right_ankle_roll_link$).+$"
-                ],
+                body_names=MISSING,
             ),
             "threshold": 1.0,
         },
@@ -337,16 +304,16 @@ class RewardsCfg:
         func=mdp.feet_slide,
         weight=-0.5,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=MISSING),
+            "asset_cfg": SceneEntityCfg("robot", body_names=MISSING),
         },
     )
     feet_orientation_l2 = RewTerm(
         func=mdp.feet_orientation_l2,
         weight=-0.5,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=MISSING),
+            "asset_cfg": SceneEntityCfg("robot", body_names=MISSING),
         },
     )
 
@@ -369,12 +336,7 @@ class TerminationsCfg:
     #     params={
     #         "command_name": "motion",
     #         "threshold": 0.25,
-    #         "body_names": [
-    #             "left_ankle_roll_link",
-    #             "right_ankle_roll_link",
-    #             "left_wrist_yaw_link",
-    #             "right_wrist_yaw_link",
-    #         ],
+    #         "body_names": MISSING,
     #     },
     # )
 
