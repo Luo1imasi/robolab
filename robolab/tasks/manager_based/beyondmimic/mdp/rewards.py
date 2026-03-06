@@ -135,3 +135,30 @@ def feet_slide(
     reward = torch.sum(foot_leteral_vel * contacts, dim=1)
     return reward
 
+def stand_still_after_motion(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    pos_cfg: SceneEntityCfg,
+    vel_cfg: SceneEntityCfg,
+    pos_weight: float = 1.0,
+    vel_weight: float = 1.0,
+) -> torch.Tensor:
+    """Penalize joint position error from default on the articulation after motion ends.
+    
+    Only active when motion_ended=True. Uses the same logic as the original stand_still reward.
+    """
+    command: MotionCommand = env.command_manager.get_term(command_name)
+    asset = env.scene["robot"]
+    
+    pos_reward = pos_weight * torch.sum(torch.abs(
+        asset.data.joint_pos[:, pos_cfg.joint_ids] - asset.data.default_joint_pos[:, pos_cfg.joint_ids]), dim=1
+    )
+    vel_reward = vel_weight * torch.sum(torch.abs(asset.data.joint_vel[:, vel_cfg.joint_ids]), dim=1)
+    
+    reward = pos_reward + vel_reward
+    reward *= torch.clamp(-asset.data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    
+    # Only apply when motion has ended
+    reward = torch.where(command.motion_ended, reward, torch.zeros_like(reward))
+    
+    return reward

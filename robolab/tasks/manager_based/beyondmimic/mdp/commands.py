@@ -126,6 +126,10 @@ class MotionCommand(CommandTerm):
         self.metrics["error_joint_pos"] = torch.zeros(self.num_envs, device=self.device)
         self.metrics["error_joint_vel"] = torch.zeros(self.num_envs, device=self.device)
         self.metrics["sampling_entropy"] = torch.zeros(self.num_envs, device=self.device)
+
+        # Track whether motion has ended for each env (used for blend_to_default)
+        self.motion_ended = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
+        self.steps_after_motion_end = torch.zeros(self.num_envs, dtype=torch.long, device=self.device)
         self.metrics["sampling_top1_prob"] = torch.zeros(self.num_envs, device=self.device)
         self.metrics["sampling_top1_bin"] = torch.zeros(self.num_envs, device=self.device)
 
@@ -276,6 +280,9 @@ class MotionCommand(CommandTerm):
         if len(env_ids) == 0:
             return
         self._adaptive_sampling(env_ids)
+        # Reset motion_ended state for resampled envs
+        self.motion_ended[env_ids] = False
+        self.steps_after_motion_end[env_ids] = 0
 
         root_pos = self.body_pos_w[:, 0].clone()
         root_ori = self.body_quat_w[:, 0].clone()
@@ -311,7 +318,15 @@ class MotionCommand(CommandTerm):
     def _update_command(self):
         self.time_steps += 1
         env_ids = torch.where(self.time_steps >= self.motion.time_step_total)[0]
-        self._resample_command(env_ids)
+
+        if self.cfg.reset_on_motion_end:
+            # Original behavior: reset envs when motion ends
+            self._resample_command(env_ids)
+        else:
+            # New behavior: clamp to last frame and track motion_ended state
+            self.time_steps = torch.clamp(self.time_steps, max=self.motion.time_step_total - 1)
+            self.motion_ended[env_ids] = True
+            self.steps_after_motion_end[self.motion_ended] += 1
 
         anchor_pos_w_repeat = self.anchor_pos_w[:, None, :].repeat(1, len(self.cfg.body_names), 1)
         anchor_quat_w_repeat = self.anchor_quat_w[:, None, :].repeat(1, len(self.cfg.body_names), 1)
@@ -401,6 +416,10 @@ class MotionCommandCfg(CommandTermCfg):
     adaptive_lambda: float = 0.8
     adaptive_uniform_ratio: float = 0.1
     adaptive_alpha: float = 0.001
+
+    reset_on_motion_end: bool = True
+    """Whether to reset the environment when motion ends. Default is True.
+    If False, the motion will stay at the last frame and motion_ended flag will be set."""
 
     anchor_visualizer_cfg: VisualizationMarkersCfg = FRAME_MARKER_CFG.replace(prim_path="/Visuals/Command/pose")
     anchor_visualizer_cfg.markers["frame"].scale = (0.2, 0.2, 0.2)
