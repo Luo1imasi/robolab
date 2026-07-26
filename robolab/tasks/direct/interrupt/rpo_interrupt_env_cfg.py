@@ -275,7 +275,7 @@ class RPOInterruptEnvCfg(BaseEnvCfg):
         )
         self.robot.terminate_contacts_body_names = ["torso_link", ".*_thigh_yaw_link", ".*_thigh_roll_link"]
         self.robot.feet_body_names = [".*ankle_roll.*"]
-        self.events.add_base_mass.params["asset_cfg"].body_names = ["torso_link", "base_link"]
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["torso_link"]
         self.events.randomize_rigid_body_com.params["asset_cfg"].body_names = ["torso_link", "base_link"]
         self.events.scale_link_mass.params["asset_cfg"].body_names = ["left_.*_link", "right_.*_link"]
         self.events.scale_actuator_gains.params["asset_cfg"].joint_names = [".*_joint"]

@@ -165,7 +165,7 @@ class EventCfg:
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names=MISSING),
-            "mass_distribution_params": (-3.0, 3.0),
+            "mass_distribution_params": (-1.0, 1.0),
             "operation": "add",
         },
     )
@@ -204,7 +204,7 @@ class EventCfg:
         params={
             "asset_cfg": SceneEntityCfg("robot", joint_names=MISSING),
             "friction_distribution_params": (1.0, 1.0),
-            "armature_distribution_params": (0.5, 1.5),
+            "armature_distribution_params": (0.8, 1.2),
             "operation": "scale",
         },
     )
@@ -224,10 +224,10 @@ class EventCfg:
         },
     )
     reset_robot_joints = EventTerm(
-        func=mdp.reset_joints_by_scale,
+        func=mdp.reset_joints_by_offset,
         mode="reset",
         params={
-            "position_range": (0.5, 1.5),
+            "position_range": (-0.15, 0.15),
             "velocity_range": (0.0, 0.0),
         },
     )

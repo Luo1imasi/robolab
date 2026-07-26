@@ -279,8 +279,8 @@ class EventCfg:
         func=mdp.randomize_rigid_body_mass,
         mode="startup",
         params={
-            "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-            "mass_distribution_params": (-3.0, 3.0),
+            "asset_cfg": SceneEntityCfg("robot", body_names="torso_link"),
+            "mass_distribution_params": (-1.0, 1.0),
             "operation": "add",
         },
     )
@@ -353,11 +353,11 @@ class EventCfg:
         },
     )
 
-    reset_robot_joints=EventTerm(
-        func=mdp.reset_joints_by_scale,
+    reset_robot_joints = EventTerm(
+        func=mdp.reset_joints_by_offset,
         mode="reset",
         params={
-            "position_range": (0.8, 1.2),
+            "position_range": (-0.15, 0.15),
             "velocity_range": (0.0, 0.0),
         },
     )

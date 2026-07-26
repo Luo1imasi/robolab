@@ -202,8 +202,8 @@ class RPOAttnEncAgentCfg(BaseAgentCfg):
         self.num_steps_per_env = 24
         self.max_iterations = 9001
         self.save_interval = 1000
-        self.actor_obs_normalization: True
-        self.critic_obs_normalization: True
+        self.actor_obs_normalization = True
+        self.critic_obs_normalization = True
         self.policy = RslRlPpoEncActorCriticCfg(
             class_name="ActorCriticAttnEnc",
             init_noise_std=1.0,

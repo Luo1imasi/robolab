@@ -155,8 +155,8 @@ class RPOInterruptAgentCfg(BaseAgentCfg):
         self.num_steps_per_env = 24
         self.max_iterations = 9001
         self.save_interval = 1000
-        self.actor_obs_normalization: True
-        self.critic_obs_normalization: True
+        self.actor_obs_normalization = True
+        self.critic_obs_normalization = True
         self.algorithm = RslRlPpoAlgorithmCfg(
             class_name="PPO",
             value_loss_coef=1.0,

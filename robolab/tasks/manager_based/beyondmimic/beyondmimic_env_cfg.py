@@ -213,7 +213,7 @@ class EventCfg:
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="torso_link"),
-            "mass_distribution_params": (-3.0, 3.0),
+            "mass_distribution_params": (-1.0, 1.0),
             "operation": "add",
         },
     )
